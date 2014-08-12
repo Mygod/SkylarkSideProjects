@@ -78,6 +78,11 @@ namespace Mygod.Skylark.Updater
                             Thread.Sleep(5000);
                         }
                     }
+                    log.WriteLine("[{0}] 更新配置文件中……", DateTime.UtcNow);
+                    foreach (var config in new[] { "Web.config", @"bin\Skylark.dll.config" })
+                        File.WriteAllText(config, File.ReadAllText(config)
+                            .Replace("targetFramework=\"4.0\"",
+                                     "targetFramework=\"4.0\" tempDirectory=\"" + Path.GetTempPath() + '"'));
                     log.WriteLine("[{0}] 更新完成。", DateTime.UtcNow);
                 }
                 catch (Exception exc)
