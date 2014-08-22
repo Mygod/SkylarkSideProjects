@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Management;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -74,6 +77,11 @@ namespace Mygod.Skylark.Updater
                         if (retries == 0) log.WriteLine("[{0}] 重试次数过多，果断弃坑。", DateTime.UtcNow);
                         else
                         {
+                            foreach (var process in Process.GetProcessesByName("BackgroundRunner")
+                                .Where(process => process.Modules.Count > 0 &&
+                                    Path.GetFullPath(@"plugins\BackgroundRunner.exe").Equals
+                                        (process.Modules[0].FileName, StringComparison.InvariantCultureIgnoreCase)))
+                                KillProcessTree(process.Id);
                             log.WriteLine("[{0}] 将于 5 秒后重试。", DateTime.UtcNow);
                             Thread.Sleep(5000);
                         }
@@ -89,6 +97,18 @@ namespace Mygod.Skylark.Updater
                 {
                     log.WriteLine("[{0}] 更新失败，出现错误：{1}", DateTime.UtcNow, exc.GetMessage());
                 }
+        }
+
+        private static void KillProcessTree(int pid)
+        {
+            if (pid == 0) return;
+            foreach (var mbo in new ManagementObjectSearcher("Select * From Win32_Process Where ParentProcessID=" +
+                                    pid).Get()) KillProcessTree(int.Parse(mbo["ProcessID"].ToString()));
+            try
+            {
+                Process.GetProcessById(pid).Kill();
+            }
+            catch { }
         }
 
         /// <summary>
