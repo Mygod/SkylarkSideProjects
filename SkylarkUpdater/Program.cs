@@ -71,7 +71,7 @@ namespace Mygod.Skylark.Updater
                             }
                         }
                         if (list.Count <= 0) continue;
-                        if (retries == 0) log.WriteLine("[{0}] 重试次数过多，果断弃坑。");
+                        if (retries == 0) log.WriteLine("[{0}] 重试次数过多，果断弃坑。", DateTime.UtcNow);
                         else
                         {
                             log.WriteLine("[{0}] 将于 5 秒后重试。", DateTime.UtcNow);
